@@ -32,10 +32,7 @@ def classify_review(text):
         "category": "EXCLUDE"
     }
 
-    # -----------------------------------------------
-    # EXCLUDE OBVIOUS POST-PURCHASE ISSUES
-    # -----------------------------------------------
-
+    # POST-PURCHASE EXCLUSION
     post_purchase_patterns = [
         r"wanted to exchange",
         r"want to exchange",
@@ -51,11 +48,7 @@ def classify_review(text):
     if any(re.search(p, text) for p in post_purchase_patterns):
         return result
 
-
-    # -----------------------------------------------
     # WAITING FOR SALE
-    # -----------------------------------------------
-
     if re.search(
         r"didn't order.*sale|did not order.*sale|"
         r"didn't buy.*sale|did not buy.*sale|"
@@ -76,14 +69,9 @@ def classify_review(text):
             "purchase_trigger": "SALE_OR_DISCOUNT",
             "category": "PURCHASE_BARRIER"
         })
-
         return result
 
-
-    # -----------------------------------------------
     # PRICE BLOCKED PURCHASE
-    # -----------------------------------------------
-
     if re.search(
         r"couldn't buy.*expensive|could not buy.*expensive|"
         r"cannot buy.*expensive|can't buy.*expensive|"
@@ -101,14 +89,9 @@ def classify_review(text):
             "purchase_trigger": "LOWER_PRICE_OR_DISCOUNT",
             "category": "PURCHASE_BARRIER"
         })
-
         return result
 
-
-    # -----------------------------------------------
     # SIZE / FIT
-    # -----------------------------------------------
-
     if re.search(
         r"not sure.*size|which size.*buy|what size.*buy|"
         r"size chart.*confus|size guide.*confus",
@@ -122,14 +105,9 @@ def classify_review(text):
             "purchase_trigger": "SIZE_CONFIDENCE",
             "category": "PURCHASE_BARRIER"
         })
-
         return result
 
-
-    # -----------------------------------------------
     # CHECKOUT
-    # -----------------------------------------------
-
     if re.search(
         r"want to order.*not placed|"
         r"order.*not placed|"
@@ -144,14 +122,9 @@ def classify_review(text):
             "purchase_trigger": "FIX_CHECKOUT_FLOW",
             "category": "CONVERSION_BLOCKER"
         })
-
         return result
 
-
-    # -----------------------------------------------
     # DELIVERY
-    # -----------------------------------------------
-
     if re.search(
         r"not deliverable.*pincode|"
         r"not deliverable.*selected pincode|"
@@ -166,14 +139,9 @@ def classify_review(text):
             "purchase_trigger": "ENABLE_DELIVERY_TO_LOCATION",
             "category": "CONVERSION_BLOCKER"
         })
-
         return result
 
-
-    # -----------------------------------------------
     # PAYMENT
-    # -----------------------------------------------
-
     if re.search(
         r"no cash on delivery|no cod|"
         r"cod.*not available|"
@@ -188,14 +156,9 @@ def classify_review(text):
             "purchase_trigger": "ENABLE_PREFERRED_PAYMENT_METHOD",
             "category": "CONVERSION_BLOCKER"
         })
-
         return result
 
-
-    # -----------------------------------------------
-    # HIGH-INTENT WISHLIST
-    # -----------------------------------------------
-
+    # HIGH INTENT WISHLIST
     if re.search(
         r"wishlist.*save.*time.*order|"
         r"open wishlist products.*order",
@@ -210,14 +173,9 @@ def classify_review(text):
             "purchase_trigger": "FAST_RETURN_TO_SAVED_PRODUCTS",
             "category": "HIGH_INTENT_WISHLIST_BEHAVIOUR"
         })
-
         return result
 
-
-    # -----------------------------------------------
     # WISHLIST LOADING
-    # -----------------------------------------------
-
     if re.search(
         r"open.*wishlist.*slow|"
         r"wishlist.*functions slow|"
@@ -234,14 +192,9 @@ def classify_review(text):
             "purchase_trigger": "FASTER_WISHLIST_LOADING",
             "category": "WISHLIST_FRICTION"
         })
-
         return result
 
-
-    # -----------------------------------------------
     # CART → WISHLIST
-    # -----------------------------------------------
-
     if re.search(
         r"move to wishlist.*takes.*time|"
         r"wishlist pop up.*takes.*long|"
@@ -257,14 +210,63 @@ def classify_review(text):
             "purchase_trigger": "FASTER_SAVE_FOR_LATER",
             "category": "WISHLIST_FRICTION"
         })
-
         return result
 
     return result
 
 
 # =====================================================
-# UPLOAD
+# OPPORTUNITY INTERPRETATION
+# =====================================================
+
+opportunity_info = {
+
+    "WAITING_FOR_SALE": {
+        "title": "Price & Sale Uncertainty",
+        "why": "Users may postpone purchasing when they expect a better price or when sale pricing changes.",
+        "product": "Add price-history and price-drop alerts for wishlisted products."
+    },
+
+    "PAYMENT_METHOD_UNAVAILABLE": {
+        "title": "Payment Flexibility",
+        "why": "High-intent users can reach the purchase stage but fail when their preferred payment method is unavailable.",
+        "product": "Show available payment options earlier and provide alternative payment methods."
+    },
+
+    "DELIVERY_UNAVAILABLE_AT_CHECKOUT": {
+        "title": "Delivery Availability",
+        "why": "Users can discover and select products but lose the ability to purchase when delivery becomes unavailable at checkout.",
+        "product": "Surface delivery availability earlier in the shopping journey."
+    },
+
+    "CHECKOUT_FLOW_FAILURE": {
+        "title": "Checkout Friction",
+        "why": "Users with strong purchase intent report difficulty completing the order.",
+        "product": "Reduce checkout steps and clearly explain why an order cannot be completed."
+    },
+
+    "CART_TO_WISHLIST_FRICTION": {
+        "title": "Save-for-Later Friction",
+        "why": "Users may use wishlist as a way to defer and return to products later.",
+        "product": "Make saving products from cart instant and visible."
+    },
+
+    "WISHLIST_LOADING_FRICTION": {
+        "title": "Wishlist Access Friction",
+        "why": "Slow wishlist access can interrupt the user's return-to-purchase journey.",
+        "product": "Improve wishlist loading speed and provide instant access to saved products."
+    },
+
+    "PRICE_BLOCKED_PURCHASE": {
+        "title": "Price Barrier",
+        "why": "Some users explicitly identify price as preventing purchase.",
+        "product": "Offer price-drop alerts or clearer value/price comparison information."
+    }
+}
+
+
+# =====================================================
+# APP
 # =====================================================
 
 st.divider()
@@ -279,18 +281,6 @@ if uploaded_file:
     df = pd.read_csv(uploaded_file)
 
     st.success(f"Loaded {len(df):,} reviews")
-
-    st.subheader("Dataset Preview")
-
-    st.dataframe(
-        df.head(10),
-        use_container_width=True,
-        hide_index=True
-    )
-
-    # -----------------------------------------------
-    # FIND REVIEW COLUMN
-    # -----------------------------------------------
 
     possible_columns = [
         "content",
@@ -307,18 +297,10 @@ if uploaded_file:
             break
 
     if text_column is None:
-        st.error(
-            "No review-text column found."
-        )
+        st.error("No review-text column found.")
         st.stop()
 
-    st.success(
-        f"Review text column detected: `{text_column}`"
-    )
-
-    # -----------------------------------------------
-    # ANALYSE
-    # -----------------------------------------------
+    st.info(f"Review text detected: `{text_column}`")
 
     if st.button(
         "🔍 Analyse Feedback",
@@ -332,7 +314,6 @@ if uploaded_file:
         for i, text in enumerate(df[text_column]):
 
             classification = classify_review(text)
-
             classification["raw_text"] = text
 
             results.append(classification)
@@ -347,11 +328,15 @@ if uploaded_file:
             results_df["relevant"] == True
         ].copy()
 
-        st.divider()
+        opportunity_df = relevant_df[
+            relevant_df["primary_barrier"] != "NONE_IDENTIFIED"
+        ].copy()
 
-        # -------------------------------------------
+        # =================================================
         # METRICS
-        # -------------------------------------------
+        # =================================================
+
+        st.divider()
 
         col1, col2, col3 = st.columns(3)
 
@@ -370,13 +355,9 @@ if uploaded_file:
             f"{len(relevant_df) / len(df) * 100:.1f}%"
         )
 
-        # -------------------------------------------
-        # OPPORTUNITIES
-        # -------------------------------------------
-
-        opportunity_df = relevant_df[
-            relevant_df["primary_barrier"] != "NONE_IDENTIFIED"
-        ]
+        # =================================================
+        # OPPORTUNITY RANKING
+        # =================================================
 
         if len(opportunity_df) > 0:
 
@@ -387,7 +368,7 @@ if uploaded_file:
             )
 
             frequency.columns = [
-                "Opportunity",
+                "Barrier",
                 "Frequency"
             ]
 
@@ -397,23 +378,85 @@ if uploaded_file:
                 * 100
             ).round(1)
 
-            st.subheader(
-                "🏆 Opportunity Areas"
+            frequency["Opportunity"] = frequency[
+                "Barrier"
+            ].map(
+                lambda x: opportunity_info.get(
+                    x, {}
+                ).get(
+                    "title",
+                    x.replace("_", " ").title()
+                )
             )
 
+            st.subheader("🏆 Opportunity Areas")
+
             st.dataframe(
-                frequency,
+                frequency[
+                    [
+                        "Opportunity",
+                        "Frequency",
+                        "Share"
+                    ]
+                ],
                 use_container_width=True,
                 hide_index=True
             )
 
-        # -------------------------------------------
-        # SIGNALS
-        # -------------------------------------------
+            # =================================================
+            # TOP OPPORTUNITY
+            # =================================================
 
-        st.subheader(
-            "🔎 Relevant User Signals"
-        )
+            top_barrier = frequency.iloc[0]["Barrier"]
+
+            info = opportunity_info.get(
+                top_barrier,
+                {
+                    "title": top_barrier.replace("_", " ").title(),
+                    "why": "Users are reporting this recurring issue.",
+                    "product": "Investigate this issue with targeted product research."
+                }
+            )
+
+            st.divider()
+
+            st.subheader(
+                "🎯 Highest-Frequency Opportunity"
+            )
+
+            st.markdown(
+                f"## {info['title']}"
+            )
+
+            st.write(
+                f"**Why it matters:** {info['why']}"
+            )
+
+            st.write(
+                f"**Potential product opportunity:** {info['product']}"
+            )
+
+            # =================================================
+            # EVIDENCE
+            # =================================================
+
+            st.subheader("💬 User Evidence")
+
+            evidence = opportunity_df[
+                opportunity_df["primary_barrier"] == top_barrier
+            ][["raw_text"]].head(5)
+
+            st.dataframe(
+                evidence,
+                use_container_width=True,
+                hide_index=True
+            )
+
+        # =================================================
+        # ALL SIGNALS
+        # =================================================
+
+        st.subheader("🔎 Relevant User Signals")
 
         display_columns = [
             "shopping_stage",
@@ -430,9 +473,9 @@ if uploaded_file:
             hide_index=True
         )
 
-        # -------------------------------------------
+        # =================================================
         # DOWNLOAD
-        # -------------------------------------------
+        # =================================================
 
         output_csv = results_df.to_csv(
             index=False
