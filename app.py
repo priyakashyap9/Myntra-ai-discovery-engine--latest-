@@ -824,7 +824,7 @@ if uploaded_files:
                 "⬇️ Download Combined Analysis",
                 output_csv,
                 "myntra_discovery_engine_analysis.csv",
-                "text/csv"
+                "text/csv") 
                 # =====================================================
 # EXTERNAL EVIDENCE
 # =====================================================
