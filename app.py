@@ -871,4 +871,3 @@ except FileNotFoundError:
         "Upload myntra_context_sources.csv to view "
         "external evidence."
     )
-            )
