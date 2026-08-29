@@ -1,0 +1,6 @@
+﻿source,source_type,source_url,evidence_text,theme,use_in_engine
+NDTV Shopping,context_validation,https://www.ndtvshopping.com/hobby-leisure/what-is-myntra-vip-ticket-know-benefits-price-early-access-to-end-of-reason-sale-11531691,Planning your Myntra End of Reason Sale wishlist helps you make the most of VIP access.,WISHLIST_FOR_SALE_PLANNING,Do not classify as customer review; use as external context.
+WearDecoded,context_validation,https://weardecoded.com/what-to-buy-first-myntra-eors-2026/,"open Myntra, go to footwear, wishlist every pair you’re considering",WISHLIST_FOR_SALE_PLANNING,Do not classify as customer review; use as market/context evidence.
+WearDecoded,context_validation,https://weardecoded.com/what-to-buy-first-myntra-eors-2026/,Myntra sends price drop notifications throughout the sale,PRICE_DROP_NOTIFICATIONS,Use to validate the product mechanism; not customer evidence.
+Zoutons,context_validation,https://zoutons.com/news/myntra-eros-2026,Start wishlisting 2–3 weeks before the sale.,WISHLIST_FOR_SALE_PLANNING,Use as external context; do not count toward user-signal frequency.
+Myntra,product_context,https://www.myntra.com/deals,wishlist,WISHLIST_PRODUCT_SURFACE,Use only as product/context evidence; not customer evidence.
