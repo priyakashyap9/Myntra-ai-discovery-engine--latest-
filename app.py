@@ -826,4 +826,50 @@ if uploaded_files:
                 output_csv,
                 "myntra_discovery_engine_analysis.csv",
                 "text/csv"
+                # =====================================================
+# EXTERNAL EVIDENCE
+# =====================================================
+
+st.divider()
+
+st.subheader("🌐 External Evidence")
+
+st.caption(
+    "Contextual evidence from public sources. "
+    "These sources validate themes but are not counted "
+    "as customer-review signals."
+)
+
+context_path = "myntra_context_sources.csv"
+
+try:
+    context_df = pd.read_csv(context_path)
+
+    st.dataframe(
+        context_df[
+            [
+                "source",
+                "source_type",
+                "theme",
+                "evidence_text",
+                "source_url"
+            ]
+        ],
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.download_button(
+        "⬇️ Download External Evidence",
+        context_df.to_csv(index=False).encode("utf-8"),
+        "myntra_external_evidence.csv",
+        "text/csv"
+    )
+
+except FileNotFoundError:
+
+    st.info(
+        "Upload myntra_context_sources.csv to view "
+        "external evidence."
+    )
             )
